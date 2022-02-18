@@ -1,0 +1,46 @@
+stages:
+  - test-dev
+  - build-dev
+  - deploy-dev
+
+cache:
+  paths:
+    - .gradle/caches/modules-2/
+    - build/libs/
+
+test-dev:
+  stage: test-dev
+  image: maven:3-jdk-8
+  tags:
+    - dev
+  only:
+    - dev
+  script:
+    - mvn test 
+
+build-dev:
+  stage: build-dev
+  image: maven:3-jdk-8
+  tags:
+    - dev
+  only:
+    - dev
+  script:
+    - mvn clean package
+  artifacts:
+    paths:
+      - target/TakeALotTest-1.0-SNAPSHOT.jar
+
+deploy-dev:
+  image: ubuntu:latest
+  stage: deploy-dev
+  tags:
+    - dev
+  only:
+    - dev
+  script:
+    - sudo cp build/libs/TakeALotTest-1.0-SNAPSHOT.jar /home/ubuntu/TakeALotTest-1.0-SNAPSHOT.jar
+    - sudo chmod 777 /home/ubuntu/TakeALotTest-1.0-SNAPSHOT.jar
+    - sudo systemctl daemon-reload
+    - sudo systemctl restart lace
+    - echo "Deployed in Development Server"
